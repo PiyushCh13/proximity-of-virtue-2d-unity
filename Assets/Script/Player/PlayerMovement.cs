@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     public float speed;
     public float jumpForce;
     public bool grounCheck;
-    public SpriteRenderer spriteRendererP;
+    public Transform playerTransform;
     public Animator playerAnimator;
     public bool slideFwd;
     bool isSliding;
@@ -51,7 +51,9 @@ public class PlayerMovement : MonoBehaviour
             if (grounCheck)
             {
                 rb.velocity = Vector2.right * horizontal * speed;
-                spriteRendererP.flipX = false;
+                playerTransform.eulerAngles = new Vector3 (0, 0, 0);
+                //spriteRendererP.flipX = false;
+
                 playerAnimator.Play("Run");
 
             }
@@ -59,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 speed = speed / 2;
                 rb.velocity += Vector2.right * horizontal * speed * Time.deltaTime;
-                spriteRendererP.flipX = false;
+                playerTransform.eulerAngles = new Vector3(0, 0, 0);
             }
             slideFwd = true;
         }
@@ -77,7 +79,7 @@ public class PlayerMovement : MonoBehaviour
             if (grounCheck)
             {
                 rb.velocity = Vector2.right * horizontal * speed;
-                spriteRendererP.flipX = true;
+                playerTransform.eulerAngles = new Vector3(0, 180, 0);
                 playerAnimator.Play("Run");
             }
 
@@ -85,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 speed = speed / 2;
                 rb.velocity += Vector2.right * horizontal * speed * Time.deltaTime;
-                spriteRendererP.flipX = true;
+                playerTransform.eulerAngles = new Vector3(0, 180, 0);
             }
             slideFwd = false;
         }
