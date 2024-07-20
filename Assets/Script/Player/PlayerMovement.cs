@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -18,6 +20,8 @@ public class PlayerMovement : MonoBehaviour
     public GameObject glowBall;
     public float ballSpeed;
     public bool isAttacking;
+    public Image healtFiller;
+    public float currentHealth = 10;
 
     void Start()
     {
@@ -27,16 +31,16 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    
+
 
         BasicMove();
         Slide();
-        
+
         if (Input.GetMouseButtonDown(0))
         {
             if (isSliding)
                 return;
-         
+
             rb.velocity = Vector3.zero;
             isAttacking = true;
             playerAnimator.Play("Attack");
@@ -118,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
             if (grounCheck)
                 playerAnimator.Play("Idle");
             rb.velocity = Vector2.zero;
-           // cameraAnimator.Play("ZoomOut");
+            // cameraAnimator.Play("ZoomOut");
 
         }
     }
@@ -157,12 +161,14 @@ public class PlayerMovement : MonoBehaviour
         }
         playerAnimator.Play("Idle");
         isSliding = false;
+
     }
 
     public void Attack()
     {
 
         GameObject ballShoot = Instantiate(glowBall, shootArea.position, glowBall.transform.rotation);
+        ballShoot.GetComponent<BallShoot>().byPlayer = true;
         if (slideFwd)
             ballShoot.GetComponent<BallShoot>().ballSpeed = ballSpeed;
         else
@@ -173,6 +179,32 @@ public class PlayerMovement : MonoBehaviour
     public void StopAttack()
     {
         isAttacking = false;
+    }
+
+
+    public void HeathManger()
+    {
+        if (currentHealth >= 0.1f)
+        {
+            currentHealth--;
+            StartCoroutine(ReduceHealth());
+        }
+        else
+            Destroy(gameObject,.2f);
+    }
+    IEnumerator ReduceHealth()
+    {
+        float currHeath = currentHealth / 10;
+        float time = 0;
+        float tot = .5f;
+        float fillAm = healtFiller.fillAmount;
+        while (time < tot)
+        {
+            healtFiller.fillAmount = Mathf.Lerp(fillAm ,currHeath,time/tot);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {

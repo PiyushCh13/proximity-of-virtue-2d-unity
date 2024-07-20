@@ -21,9 +21,13 @@ public class EnemyMovement : MonoBehaviour
     public GameObject glowBall;
     public float ballSpeed = 7;
     Coroutine attackCo;
-    public float shootCooldown=2;
+    public float shootCooldown = 2;
+    public int currentHeathCount = 0;
+    public int MaxHeathCount = 3;
     private void Update()
     {
+        if (playerTransform == null)
+            return;
         if (isPetrol)
             Patrol();
         else
@@ -33,7 +37,7 @@ public class EnemyMovement : MonoBehaviour
             else
                 transform.eulerAngles = new Vector2(transform.eulerAngles.x, 180);
         }
-         
+
         if (isAttack)
             Attack();
     }
@@ -51,8 +55,10 @@ public class EnemyMovement : MonoBehaviour
     }
     IEnumerator StanCo()
     {
-
+        stanfillGo.gameObject.SetActive(true);
         float time = 0;
+        isAttack= false;
+        isPetrol = false;
         while (time <= stanTime)
         {
             fillBar.fillAmount = Mathf.Lerp(0, 1, time / stanTime);
@@ -60,6 +66,8 @@ public class EnemyMovement : MonoBehaviour
             yield return null;
         }
         stanfillGo.gameObject.SetActive(false);
+        Destroy(gameObject,.2f); 
+
     }
 
     public void Attack()
@@ -75,12 +83,22 @@ public class EnemyMovement : MonoBehaviour
     IEnumerator AttackCo()
     {
         GameObject ballShoot = Instantiate(glowBall, shootPlace.position, glowBall.transform.rotation);
+        ballShoot.GetComponent<BallShoot>().byEnemy = true;
         if (transform.position.x < playerTransform.position.x)
             ballShoot.GetComponent<BallShoot>().ballSpeed = ballSpeed;
         else
             ballShoot.GetComponent<BallShoot>().ballSpeed = -ballSpeed;
         yield return new WaitForSeconds(shootCooldown);
         attackCo = null;
+    }
+    public void GetDamage()
+    {
+        currentHeathCount++;
+        if (currentHeathCount >= MaxHeathCount)
+        {
+            if (stanCo == null)
+                stanCo = StartCoroutine(StanCo());
+        }
     }
 
 }
