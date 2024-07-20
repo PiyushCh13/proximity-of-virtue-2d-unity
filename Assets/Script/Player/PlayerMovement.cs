@@ -13,6 +13,13 @@ public class PlayerMovement : MonoBehaviour
     public bool slideFwd;
     bool isSliding;
     public float slideUnit;
+    public float timeToslide = .5f;
+    public Transform shootArea;
+    public GameObject glowBall;
+    public float ballSpeed;
+    public bool isAttacking;
+    public Animator cameraAnimator;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -21,20 +28,45 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(slideFwd)
+        {
+            if (rb.velocity.x <= 0)
+                cameraAnimator.Play("ZoomOut");
+        }
+        else
+        {
+            if (rb.velocity.x >= 0)
+                cameraAnimator.Play("ZoomOut");
+        }
+       
+
         BasicMove();
         Slide();
+        
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (isSliding)
+                return;
+         
+            rb.velocity = Vector3.zero;
+            isAttacking = true;
+            playerAnimator.Play("Attack");
+        }
     }
     public void BasicMove()
     {
+        if (isAttacking)
+            return;
         if (isSliding)
             return;
-        
+
 
         if (Input.GetKeyDown(KeyCode.Space) && grounCheck)
         {
             rb.AddForce(Vector2.up * jumpForce);
             grounCheck = false;
             playerAnimator.Play("Jump");
+
 
         }
 
@@ -43,15 +75,14 @@ public class PlayerMovement : MonoBehaviour
             playerAnimator.Play("JumpDrop");
         }
 
-        if (Input.GetKey(KeyCode.D)  && !Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.D) && !Input.GetKey(KeyCode.A))
         {
             float horizontal = Input.GetAxis("Horizontal");
-
 
             if (grounCheck)
             {
                 rb.velocity = Vector2.right * horizontal * speed;
-                playerTransform.eulerAngles = new Vector3 (0, 0, 0);
+                playerTransform.eulerAngles = new Vector3(0, 0, 0);
                 //spriteRendererP.flipX = false;
 
                 playerAnimator.Play("Run");
@@ -64,14 +95,17 @@ public class PlayerMovement : MonoBehaviour
                 playerTransform.eulerAngles = new Vector3(0, 0, 0);
             }
             slideFwd = true;
+            cameraAnimator.Play("ZoomIn");
         }
         if (Input.GetKeyUp(KeyCode.D))
         {
-            playerAnimator.Play("Idle");
+            if (grounCheck)
+                playerAnimator.Play("Idle");
             rb.velocity = Vector2.zero;
+
         }
 
-        if (Input.GetKey(KeyCode.A)&& !Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D))
         {
             float horizontal = Input.GetAxis("Horizontal");
 
@@ -90,16 +124,21 @@ public class PlayerMovement : MonoBehaviour
                 playerTransform.eulerAngles = new Vector3(0, 180, 0);
             }
             slideFwd = false;
+            cameraAnimator.Play("ZoomIn");
         }
         if (Input.GetKeyUp(KeyCode.A))
         {
-            playerAnimator.Play("Idle");
+            if (grounCheck)
+                playerAnimator.Play("Idle");
             rb.velocity = Vector2.zero;
-            
+           // cameraAnimator.Play("ZoomOut");
+
         }
     }
     public void Slide()
     {
+        if (isAttacking)
+            return;
         if (grounCheck)
         {
             if (Input.GetKeyUp(KeyCode.LeftShift))
@@ -114,11 +153,12 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
     IEnumerator SlideCo(float unitToMove)
     {
         isSliding = true;
         float time = 0;
-        float timeToslide = .6f;
+
         playerAnimator.Play("Slide");
         Vector3 startPos = transform.position;
         while (time < timeToslide)
@@ -132,6 +172,21 @@ public class PlayerMovement : MonoBehaviour
         isSliding = false;
     }
 
+    public void Attack()
+    {
+
+        GameObject ballShoot = Instantiate(glowBall, shootArea.position, glowBall.transform.rotation);
+        if (slideFwd)
+            ballShoot.GetComponent<BallShoot>().ballSpeed = ballSpeed;
+        else
+            ballShoot.GetComponent<BallShoot>().ballSpeed = -ballSpeed;
+
+    }
+
+    public void StopAttack()
+    {
+        isAttacking = false;
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.name.Contains("Ground"))
