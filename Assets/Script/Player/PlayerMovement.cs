@@ -18,7 +18,6 @@ public class PlayerMovement : MonoBehaviour
     public GameObject glowBall;
     public float ballSpeed;
     public bool isAttacking;
-    public Animator cameraAnimator;
 
     void Start()
     {
@@ -28,17 +27,7 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(slideFwd)
-        {
-            if (rb.velocity.x <= 0)
-                cameraAnimator.Play("ZoomOut");
-        }
-        else
-        {
-            if (rb.velocity.x >= 0)
-                cameraAnimator.Play("ZoomOut");
-        }
-       
+    
 
         BasicMove();
         Slide();
@@ -95,7 +84,6 @@ public class PlayerMovement : MonoBehaviour
                 playerTransform.eulerAngles = new Vector3(0, 0, 0);
             }
             slideFwd = true;
-            cameraAnimator.Play("ZoomIn");
         }
         if (Input.GetKeyUp(KeyCode.D))
         {
@@ -124,7 +112,6 @@ public class PlayerMovement : MonoBehaviour
                 playerTransform.eulerAngles = new Vector3(0, 180, 0);
             }
             slideFwd = false;
-            cameraAnimator.Play("ZoomIn");
         }
         if (Input.GetKeyUp(KeyCode.A))
         {
