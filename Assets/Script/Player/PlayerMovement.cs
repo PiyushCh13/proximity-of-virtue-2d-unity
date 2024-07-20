@@ -28,9 +28,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isSliding)
             return;
-        float horizontal = Input.GetAxis("Horizontal");
-
-
+        
 
         if (Input.GetKeyDown(KeyCode.Space) && grounCheck)
         {
@@ -45,8 +43,11 @@ public class PlayerMovement : MonoBehaviour
             playerAnimator.Play("JumpDrop");
         }
 
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D)  && !Input.GetKey(KeyCode.A))
         {
+            float horizontal = Input.GetAxis("Horizontal");
+
+
             if (grounCheck)
             {
                 rb.velocity = Vector2.right * horizontal * speed;
@@ -68,8 +69,11 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector2.zero;
         }
 
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A)&& !Input.GetKey(KeyCode.D))
         {
+            float horizontal = Input.GetAxis("Horizontal");
+
+
             if (grounCheck)
             {
                 rb.velocity = Vector2.right * horizontal * speed;
