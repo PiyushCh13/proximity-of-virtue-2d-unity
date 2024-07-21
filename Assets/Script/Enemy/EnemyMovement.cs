@@ -1,18 +1,27 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
+public enum EnemyType
+{
+    BASIC_ENEMY,
+    CORRUPT_DROID,
+    BOSS_DROID
+}
+
 public class EnemyMovement : MonoBehaviour
 {
-
+    public EnemyType enemyType = EnemyType.BASIC_ENEMY;
     public Transform wayPoint;
     public bool isPetrol;
     public bool isFwd;
     public Transform playerTransform;
     public float attackRadius;
-    Coroutine stanCo;
+    Coroutine stunCo;
     public float stanTime;
     public Transform stanfillGo;
     public Image fillBar;
@@ -25,6 +34,12 @@ public class EnemyMovement : MonoBehaviour
     public int currentHeathCount = 0;
     public int MaxHeathCount = 3;
     private PlayerMovement playerRef;
+
+    [Header("Stun_&_Recover Settings")]
+    public bool isStuned;
+    [SerializeField]
+    GameObject recoveryParticle;
+    float enlightenDuration = 3;
 
     private void Start()
     {
@@ -60,9 +75,19 @@ public class EnemyMovement : MonoBehaviour
         }
         stanfillGo.LookAt(Camera.main.transform);
     }
-    IEnumerator StanCo()
+
+    public void OffStunCo()
+    {
+        if(stunCo != null )
+        {
+           StopCoroutine(stunCo);
+           stunCo = null;
+        }
+    }
+    IEnumerator StunCo()
     {
         stanfillGo.gameObject.SetActive(true);
+        isStuned = true;
         float time = 0;
         isAttack= false;
         isPetrol = false;
@@ -103,8 +128,8 @@ public class EnemyMovement : MonoBehaviour
         currentHeathCount++;
         if (currentHeathCount >= MaxHeathCount)
         {
-            if (stanCo == null)
-                stanCo = StartCoroutine(StanCo());
+            if (stunCo == null)
+                stunCo = StartCoroutine(StunCo());
         }
     }
 
@@ -121,4 +146,32 @@ public class EnemyMovement : MonoBehaviour
         print("Entered Player");
     }
 
+    public void Defeat()
+    {
+        if (isStuned) 
+        {
+            OnRecover();
+        }
+        else
+        {
+            OnKill();
+        }
+    }
+    public void OnRecover()
+    {
+        StartCoroutine(Enlightenment(enlightenDuration));
+    }
+
+    IEnumerator Enlightenment(float duration)
+    {
+        //PlayParticle
+        recoveryParticle.SetActive(true);
+        yield return new WaitForSeconds(duration);
+        Destroy(gameObject);
+
+    }
+    public void OnKill() 
+    {
+
+    }
 }
