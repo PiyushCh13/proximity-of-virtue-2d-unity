@@ -10,24 +10,31 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
-
+    [Header("Components")]
     Rigidbody2D rb;
+    [SerializeField] Camera cam; 
+    public Animator playerAnimator;
+
+    [Header("Player_Settings")]
     public float speed;
     public float jumpForce;
     public bool grounCheck;
     public Transform playerTransform;
-    public Animator playerAnimator;
+    public bool isAttacking;
+    public float currentHealth = 10;
+    public float minZoom;
+    public float maxZoom;
     public bool slideFwd;
     bool isSliding;
     public float slideUnit;
     public float timeToslide = .5f;
+    public Image healtFiller;
+
+    [Header("Player_Shooting")]
     public Transform shootArea;
     public GameObject glowBall;
     public float ballSpeed;
-    public bool isAttacking;
-    public Image healtFiller;
-    public float currentHealth = 10;
-
+    
     [Header("HealBeam_Settings")]
     public LineRenderer healingBeamLineRenderer;
     bool healBeamOnce = false;
@@ -76,12 +83,12 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
 
-        //TripleLaserFire();
-        //SpellAttack();
         BasicMove();
         if (Input.GetKeyDown(KeyCode.K))
         {
-            SpecialDashAttack();
+            //SpellAttack();
+            TripleLaserFire();
+            //SpecialDashAttack();
         }
 
 
@@ -96,6 +103,8 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector3.zero;
             isAttacking = true;
             playerAnimator.Play("Attack");
+            attackDirection = Vector3.right;
+            Attack();
         }
     }
 
@@ -150,6 +159,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void BasicMove()
     {
+        PlayerCamZoom();
+
         if (isAttacking)
             return;
         if (isSliding)
@@ -165,7 +176,7 @@ public class PlayerMovement : MonoBehaviour
 
         }
 
-        if (rb.velocity.y < 0)
+        if (rb.velocity.y < -0.5f && !grounCheck)
         {
             playerAnimator.Play("JumpDrop");
         }
@@ -436,6 +447,18 @@ public class PlayerMovement : MonoBehaviour
                 else
                     StartCoroutine(SpecialDashCo(-specialDashUnits));
             }
+        }
+    }
+
+    private void PlayerCamZoom()
+    {
+        if (Mathf.Abs(rb.velocity.x) > 0.1f || Mathf.Abs(rb.velocity.y) > 0.1f)
+        {
+            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, minZoom, Time.deltaTime * 2f);
+        }
+        else
+        {
+            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, maxZoom, Time.deltaTime * 2f);
         }
     }
 
