@@ -47,6 +47,8 @@ public class Parallax : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (player == null)
+            return;
         Vector3 distance = new Vector2(player.transform.position.x, Mathf.Clamp(player.transform.position.y, min_Height_Offset, max_Height_Offset));
         ParallaxBackground_3.transform.position = startPos_ParallaxBackground_3 + new Vector3(distance.x * ParallaxBackground_3_XSpeed, distance.y * ParallaxBackground_3_YSpeed, distance.z) - ParallaxBackground_3_Offset;
         ParallaxBackground_2.transform.position = startPos_ParallaxBackground_2 + new Vector3(distance.x * ParallaxBackground_2_XSpeed, distance.y * ParallaxBackground_2_YSpeed, distance.z) - ParallaxBackground_2_Offset;
