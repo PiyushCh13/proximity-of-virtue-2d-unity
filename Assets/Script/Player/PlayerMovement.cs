@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
+
+
+
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -34,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     LayerMask healingBeamLayerMask;
     public EnemyMovement enemy;
+    public float healCurrentTime = 0.0f;
+    public float healTimeDuration = 2.5f;
 
 
     bool canFireTripleLaser = true;
@@ -132,20 +138,43 @@ public class PlayerMovement : MonoBehaviour
 
     private void HealingBeamAttack()
     {
-        if (Input.GetMouseButton(1))
+        if (enemy != null)
         {
-            healingBeamLineRenderer.enabled = true;
-            healingBeamLineRenderer.positionCount = 2;
-            healingBeamLineRenderer?.SetPosition(0, shootArea.position);
-            Raycast_Heal();
+            if (enemy.isStuned)
+            {
+                if (Input.GetMouseButton(1))
+                {
+                    healingBeamLineRenderer.gameObject.SetActive(true);
+                    healingBeamLineRenderer.positionCount = 2;
+                    healingBeamLineRenderer?.SetPosition(0, shootArea.position);
+                    enemy.stanfillGo.gameObject.SetActive(false);
+                    healCurrentTime += Time.deltaTime;
+                    Raycast_Heal();
+                    if (healCurrentTime >= healTimeDuration)
+                    {
+                        enemy.OnRecover();
+                        enemy = null;
+                        healCurrentTime = 0;
+
+                        healBeamOnce = false;
+                        healingBeamLineRenderer.gameObject.SetActive(false);
+                        healingBeamLineRenderer.positionCount = 0;
+                    }
+
+                }
+                if (Input.GetMouseButtonUp(1))
+                {
+                    Destroy(enemy.gameObject,.2f);
+                    enemy = null;
+                    healCurrentTime = 0;
+                    healBeamOnce = false;
+                    healingBeamLineRenderer.gameObject.SetActive(false);
+                    healingBeamLineRenderer.positionCount = 0;
+                }
+            }
 
         }
-        else
-        {
-            healBeamOnce = false;
-            healingBeamLineRenderer.enabled = false;
-            healingBeamLineRenderer.positionCount = 0;
-        }
+
     }
 
     public void BasicMove()
@@ -155,6 +184,7 @@ public class PlayerMovement : MonoBehaviour
         if (isSliding)
             return;
 
+       
 
         if (Input.GetKeyDown(KeyCode.Space) && grounCheck)
         {
@@ -364,6 +394,7 @@ public class PlayerMovement : MonoBehaviour
             if (!healBeamOnce)
             {
                 rayCast = Physics2D.Raycast(shootArea.position, enemy.gameObject.transform.position - shootArea.transform.position, healingBeamLayerMask);
+                enemy.OffStunCo();
                 print("Raycast Object " + rayCast.collider.gameObject.name);
                 print("Calling Raycast_Heal");
                 healBeamOnce = true;
@@ -423,7 +454,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         if (grounCheck)
         {
-            if(enemy != null) 
+            if (enemy != null)
             {
                 var collider = enemy.gameObject?.GetComponent<Collider2D>();
                 collider.isTrigger = true;
@@ -439,7 +470,15 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    //IEnumerator HealBeamFireCo(Vector3 startPos, Vector3 finishPos, float duration)
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.name.Contains("BasicEnemy"))
+        {
+            enemy = collision.GetComponent<EnemyMovement>();
+        }
+    }
+
+    //IEnumerator HealEnemyCoroutine(Vector3 startPos, Vector3 finishPos, float duration)
     //{
     //    float time = 0.0f;
     //    while (time < duration)
