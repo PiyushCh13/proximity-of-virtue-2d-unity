@@ -12,7 +12,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Components")]
     Rigidbody2D rb;
-    [SerializeField] Camera cam; 
+    [SerializeField] Camera cam;
     public Animator playerAnimator;
 
     [Header("Player_Settings")]
@@ -22,6 +22,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform playerTransform;
     public bool isAttacking;
     public float currentHealth = 10;
+    public float maxHealth = 10;
     public float minZoom;
     public float maxZoom;
     public bool slideFwd;
@@ -34,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform shootArea;
     public GameObject glowBall;
     public float ballSpeed;
-    
+
     [Header("HealBeam_Settings")]
     public LineRenderer healingBeamLineRenderer;
     bool healBeamOnce = false;
@@ -72,6 +73,8 @@ public class PlayerMovement : MonoBehaviour
         attackDirection = Vector3.zero;
         rb = GetComponent<Rigidbody2D>();
         healingBeamLineRenderer.SetPosition(0, shootArea.position);
+        slideFwd = true;
+        grounCheck = true;
     }
 
     private void FixedUpdate()
@@ -104,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
             isAttacking = true;
             playerAnimator.Play("Attack");
             attackDirection = Vector3.right;
-            Attack();
+            //  Attack();
         }
     }
 
@@ -125,7 +128,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (canFireTripleLaser)
             {
-                TripleLaser();
+                // TripleLaser();
                 StartCoroutine(TripleLaserCooldown());
             }
         }
@@ -206,7 +209,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (grounCheck)
                 playerAnimator.Play("Idle");
-            rb.velocity = Vector2.zero;
+            // rb.velocity = Vector2.zero;
 
         }
 
@@ -234,7 +237,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (grounCheck)
                 playerAnimator.Play("Idle");
-            rb.velocity = Vector2.zero;
+            // rb.velocity = Vector2.zero;
             // cameraAnimator.Play("ZoomOut");
 
         }
@@ -243,9 +246,10 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isAttacking)
             return;
-        if (grounCheck)
+
+        if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            if (Input.GetKeyUp(KeyCode.LeftShift))
+            if (!isSliding)
             {
                 if (slideFwd)
                 {
@@ -254,7 +258,9 @@ public class PlayerMovement : MonoBehaviour
                 else
                     StartCoroutine(SlideCo(-slideUnit));
             }
+           
         }
+
     }
 
 
@@ -332,11 +338,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
-    public void HeathManger()
+    public void HeathManger(float cc)
     {
         if (currentHealth >= 0.1f)
         {
-            currentHealth--;
+            currentHealth  -= cc;
             StartCoroutine(ReduceHealth());
         }
         else
@@ -344,7 +350,7 @@ public class PlayerMovement : MonoBehaviour
     }
     IEnumerator ReduceHealth()
     {
-        float currHeath = currentHealth / 10;
+        float currHeath = currentHealth / maxHealth;
         float time = 0;
         float tot = .5f;
         float fillAm = healtFiller.fillAmount;
@@ -391,17 +397,17 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    private void TripleLaser()
-    {
-        attackDirection = Vector3.right;
-        Attack();
-        attackDirection = Vector3.up + Vector3.right;
-        attackDirection.Normalize();
-        Attack();
-        attackDirection = Vector3.down + Vector3.right;
-        attackDirection.Normalize();
-        Attack();
-    }
+    //private void TripleLaser()
+    //{
+    //    attackDirection = Vector3.right;
+    //    Attack();
+    //    attackDirection = Vector3.up + Vector3.right;
+    //    attackDirection.Normalize();
+    //    Attack();
+    //    attackDirection = Vector3.down + Vector3.right;
+    //    attackDirection.Normalize();
+    //    Attack();
+    //}
 
     private void Boss_Heal()
     {
@@ -434,7 +440,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         if (grounCheck)
         {
-            if(enemy != null) 
+            if (enemy != null)
             {
                 var collider = enemy.gameObject?.GetComponent<Collider2D>();
                 collider.isTrigger = true;
