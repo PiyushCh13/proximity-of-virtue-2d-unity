@@ -9,6 +9,8 @@ public class BallShoot : MonoBehaviour
     public bool byPlayer;
     public PlayerMovement player;
     public Vector2 direction = Vector2.right;
+    public float cc =1;
+    public float forBoss = 2;
     // Start is called before the first frame update
 
     public BallShoot()
@@ -47,7 +49,12 @@ public class BallShoot : MonoBehaviour
         }
         if (collision.gameObject.name.Contains("Player") && byEnemy)
         {
-            collision.gameObject.GetComponent<PlayerMovement>().HeathManger();
+            collision.gameObject.GetComponent<PlayerMovement>().HeathManger(cc);
+            Destroy(gameObject);
+        }
+        if (collision.gameObject.name.Contains("Boss") && byPlayer)
+        {
+            collision.gameObject.GetComponent<Boss>().BossHealth(forBoss);
             Destroy(gameObject);
         }
     }
