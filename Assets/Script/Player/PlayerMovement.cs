@@ -1,11 +1,16 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
+
     Rigidbody2D rb;
     public float speed;
     public float jumpForce;
@@ -23,18 +28,65 @@ public class PlayerMovement : MonoBehaviour
     public Image healtFiller;
     public float currentHealth = 10;
 
+    [Header("HealBeam_Settings")]
+    public LineRenderer healingBeamLineRenderer;
+    bool healBeamOnce = false;
+    [SerializeField]
+    LayerMask healingBeamLayerMask;
+    public EnemyMovement enemy;
+
+
+    bool canFireTripleLaser = true;
+    Vector3 attackDirection = Vector3.zero;
+
+    [Header("TripleLaser_Settings")]
+    [SerializeField]
+    float tripleLaserCooldown = 2.0f;
+
+    [Header("SpellAttack_Settings")]
+    [SerializeField]
+    float spellParticle_Zoffset = -7.5f;
+    [SerializeField]
+    float spellAttackRadius = 15.0f;
+    [SerializeField]
+    GameObject spellParticle;
+
+    [Header("Score_Settings")]
+    public int hitWithoutDamage = 0;
+    public int defeatWithoutDamage = 0;
+    public int soulsCollected = 0;
+
+    [Header("Special DashAttack Settings")]
+    public int specialDashUnits;
+
+
     void Start()
     {
+        attackDirection = Vector3.zero;
         rb = GetComponent<Rigidbody2D>();
+        healingBeamLineRenderer.SetPosition(0, shootArea.position);
+    }
+
+    private void FixedUpdate()
+    {
+
     }
 
     // Update is called once per frame
     void Update()
     {
 
-
+        //TripleLaserFire();
+        //SpellAttack();
         BasicMove();
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            SpecialDashAttack();
+        }
+
+
         Slide();
+        HealingBeamAttack();
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -46,6 +98,56 @@ public class PlayerMovement : MonoBehaviour
             playerAnimator.Play("Attack");
         }
     }
+
+    private void SpellAttack()
+    {
+        //if (Input.GetKeyDown(KeyCode.E))
+        {
+            print("SpellAttack");
+            {
+                Instantiate(spellParticle, enemy.gameObject.transform.position + new Vector3(0.0f, 0.0f, spellParticle_Zoffset), transform.rotation);
+            }
+        }
+    }
+
+    private void TripleLaserFire()
+    {
+        //if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (canFireTripleLaser)
+            {
+                TripleLaser();
+                StartCoroutine(TripleLaserCooldown());
+            }
+        }
+    }
+
+    IEnumerator TripleLaserCooldown()
+    {
+        yield return new WaitForSeconds(tripleLaserCooldown);
+        canFireTripleLaser = false;
+        yield return new WaitForSeconds(tripleLaserCooldown);
+        canFireTripleLaser = true;
+    }
+
+    private void HealingBeamAttack()
+    {
+        if (Input.GetMouseButton(1))
+        {
+            healingBeamLineRenderer.enabled = true;
+            healingBeamLineRenderer.positionCount = 2;
+            healingBeamLineRenderer?.SetPosition(0, shootArea.position);
+            Raycast_Heal();
+
+        }
+        else
+        {
+            healBeamOnce = false;
+            healingBeamLineRenderer.enabled = false;
+            healingBeamLineRenderer.positionCount = 0;
+        }
+    }
+
     public void BasicMove()
     {
         if (isAttacking)
@@ -164,10 +266,47 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    IEnumerator SpecialDashCo(float unitToMove)
+    {
+        isSliding = true;
+        float time = 0;
+
+        playerAnimator.Play("Slide");
+        Vector3 startPos = transform.position;
+        while (time < timeToslide)
+        {
+            time += Time.deltaTime;
+            transform.position =
+            Vector3.Lerp(transform.position, new Vector3(enemy.gameObject.transform.position.x + unitToMove, transform.position.y, 0), time / timeToslide);
+            yield return null;
+        }
+
+        transform.position = new Vector3(enemy.gameObject.transform.position.x + unitToMove, transform.position.y, 0);
+
+        if (enemy != null)
+        {
+            var collider = enemy.gameObject?.GetComponent<Collider2D>();
+            collider.isTrigger = false;
+        }
+
+        playerAnimator.Play("Idle");
+        isSliding = false;
+
+    }
+
+
     public void Attack()
     {
 
+        print("AttackDirection " + attackDirection.magnitude.ToString());
+        //Condition if attackdirection is zero
+        if (attackDirection.magnitude < 1)
+        {
+            attackDirection = Vector3.right;
+        }
+
         GameObject ballShoot = Instantiate(glowBall, shootArea.position, glowBall.transform.rotation);
+        ballShoot.GetComponent<BallShoot>().direction = attackDirection;
         ballShoot.GetComponent<BallShoot>().byPlayer = true;
         if (slideFwd)
             ballShoot.GetComponent<BallShoot>().ballSpeed = ballSpeed;
@@ -190,7 +329,7 @@ public class PlayerMovement : MonoBehaviour
             StartCoroutine(ReduceHealth());
         }
         else
-            Destroy(gameObject,.2f);
+            Destroy(gameObject, .2f);
     }
     IEnumerator ReduceHealth()
     {
@@ -200,7 +339,7 @@ public class PlayerMovement : MonoBehaviour
         float fillAm = healtFiller.fillAmount;
         while (time < tot)
         {
-            healtFiller.fillAmount = Mathf.Lerp(fillAm ,currHeath,time/tot);
+            healtFiller.fillAmount = Mathf.Lerp(fillAm, currHeath, time / tot);
             time += Time.deltaTime;
             yield return null;
         }
@@ -215,4 +354,107 @@ public class PlayerMovement : MonoBehaviour
             speed = 5;
         }
     }
+
+
+    RaycastHit2D rayCast;
+    private void Raycast_Heal()
+    {
+        if (enemy != null)
+        {
+            if (!healBeamOnce)
+            {
+                rayCast = Physics2D.Raycast(shootArea.position, enemy.gameObject.transform.position - shootArea.transform.position, healingBeamLayerMask);
+                print("Raycast Object " + rayCast.collider.gameObject.name);
+                print("Calling Raycast_Heal");
+                healBeamOnce = true;
+            }
+
+
+            healingBeamLineRenderer.SetPosition(1, enemy.transform.position);
+            if (healingBeamLineRenderer.GetPosition(0) == Vector3.zero)
+            {
+                healingBeamLineRenderer.enabled = false;
+            }
+
+        }
+
+    }
+
+    private void TripleLaser()
+    {
+        attackDirection = Vector3.right;
+        Attack();
+        attackDirection = Vector3.up + Vector3.right;
+        attackDirection.Normalize();
+        Attack();
+        attackDirection = Vector3.down + Vector3.right;
+        attackDirection.Normalize();
+        Attack();
+    }
+
+    private void Boss_Heal()
+    {
+        //Instantiate 5 droid
+        // then heal
+    }
+
+    private void Random_Attack()
+    {
+        int rand = UnityEngine.Random.Range(0, 3);
+
+        switch (rand)
+        {
+            case 0:
+                TripleLaserFire();
+                break;
+            case 1:
+                SpellAttack();
+                break;
+            case 2:
+                SpecialDashAttack();
+                break;
+        }
+
+    }
+
+    private void SpecialDashAttack()
+    {
+        if (isAttacking)
+            return;
+        if (grounCheck)
+        {
+            if(enemy != null) 
+            {
+                var collider = enemy.gameObject?.GetComponent<Collider2D>();
+                collider.isTrigger = true;
+            }
+            {
+                if (slideFwd)
+                {
+                    StartCoroutine(SpecialDashCo(specialDashUnits));
+                }
+                else
+                    StartCoroutine(SpecialDashCo(-specialDashUnits));
+            }
+        }
+    }
+
+    //IEnumerator HealBeamFireCo(Vector3 startPos, Vector3 finishPos, float duration)
+    //{
+    //    float time = 0.0f;
+    //    while (time < duration)
+    //    {
+    //        time += Time.deltaTime;
+    //        startPos = Vector3.Lerp(startPos, finishPos, time / duration);
+    //        healingBeamLineRenderer.positionCount = 1;
+    //        healingBeamLineRenderer?.SetPosition(1, startPos);
+    //        yield return null;
+    //    }
+
+    //    startPos = finishPos;
+    //    healingBeamLineRenderer.positionCount = 0;
+
+    //}
+
+
 }

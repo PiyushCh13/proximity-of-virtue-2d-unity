@@ -7,16 +7,28 @@ public class BallShoot : MonoBehaviour
     public float ballSpeed;
     public bool byEnemy;
     public bool byPlayer;
+    public PlayerMovement player;
+    public Vector2 direction = Vector2.right;
     // Start is called before the first frame update
+
+    public BallShoot()
+    {
+        this.direction = Vector3.right;
+    }
+    public BallShoot(Vector2 direction)
+    {
+        this.direction = direction;
+    }
     void Start()
     {
+        player = FindObjectOfType<PlayerMovement>();
         Destroy(gameObject,3);
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.right * ballSpeed * Time.deltaTime);
+        transform.Translate(direction * ballSpeed * Time.deltaTime);
        
 
     }
@@ -25,6 +37,11 @@ public class BallShoot : MonoBehaviour
     {
         if(collision.gameObject.name.Contains("BasicEnemy") && byPlayer)
         {
+            if(player != null) 
+            {
+                player.enemy = collision.gameObject.GetComponent<EnemyMovement>();
+            }
+
             collision.gameObject.GetComponent<EnemyMovement>().GetDamage();
             Destroy(gameObject);
         }

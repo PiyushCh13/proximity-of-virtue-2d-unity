@@ -24,6 +24,13 @@ public class EnemyMovement : MonoBehaviour
     public float shootCooldown = 2;
     public int currentHeathCount = 0;
     public int MaxHeathCount = 3;
+    private PlayerMovement playerRef;
+
+    private void Start()
+    {
+        playerRef = FindObjectOfType<PlayerMovement>();
+    }
+
     private void Update()
     {
         if (playerTransform == null)
@@ -99,6 +106,19 @@ public class EnemyMovement : MonoBehaviour
             if (stanCo == null)
                 stanCo = StartCoroutine(StanCo());
         }
+    }
+
+    public void OnDestroy()
+    {
+        if(playerRef != null)
+        {
+            playerRef.hitWithoutDamage++;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        print("Entered Player");
     }
 
 }
