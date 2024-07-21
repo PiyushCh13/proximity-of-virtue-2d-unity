@@ -33,6 +33,8 @@ public class Boss : MonoBehaviour
     public float currentHealth = 10;
     public float maxHealth = 10;
     public Image healtFiller;
+    public RawImage fadeImage;
+    public bool bossDied = false;
     private void Start()
     {
         bossAnimator = GetComponent<Animator>();
@@ -173,6 +175,10 @@ public class Boss : MonoBehaviour
         bossState = BossState.boss_IdelState;
     }
 
+    public void BossDied()
+    {
+        SceneManagement.Instance.LoadScene(fadeImage, SceneList.EndingScene.ToString());
+    }
 
     public void BasicAttack1()
     {
@@ -207,7 +213,7 @@ public class Boss : MonoBehaviour
             StartCoroutine(ReduceHealth());
         }
         else
-            Destroy(gameObject, .2f);
+            bossAnimator.Play("Boss_Die");
     }
     IEnumerator ReduceHealth()
     {
