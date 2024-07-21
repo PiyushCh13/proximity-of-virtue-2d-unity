@@ -163,7 +163,6 @@ public class PlayerMovement : MonoBehaviour
                         enemy.OnRecover();
                         enemy = null;
                         healCurrentTime = 0;
-
                         healBeamOnce = false;
                         healingBeamLineRenderer.gameObject.SetActive(false);
                         healingBeamLineRenderer.positionCount = 0;
