@@ -30,6 +30,8 @@ public class PlayerMovement : MonoBehaviour
     public float slideUnit;
     public float timeToslide = .5f;
     public Image healtFiller;
+    public float healCurrentTime = 0.0f;
+    public float healTimeDuration = 2.5f;
 
     [Header("Player_Shooting")]
     public Transform shootArea;
@@ -144,19 +146,42 @@ public class PlayerMovement : MonoBehaviour
 
     private void HealingBeamAttack()
     {
-        if (Input.GetMouseButton(1))
+        if (enemy != null)
         {
-            healingBeamLineRenderer.enabled = true;
-            healingBeamLineRenderer.positionCount = 2;
-            healingBeamLineRenderer?.SetPosition(0, shootArea.position);
-            Raycast_Heal();
+            if (enemy.isStuned)
+            {
+                if (Input.GetMouseButton(1))
+                {
+                    healingBeamLineRenderer.gameObject.SetActive(true);
+                    healingBeamLineRenderer.positionCount = 2;
+                    healingBeamLineRenderer?.SetPosition(0, shootArea.position);
+                    enemy.stanfillGo.gameObject.SetActive(false);
+                    healCurrentTime += Time.deltaTime;
+                    Raycast_Heal();
+                    if (healCurrentTime >= healTimeDuration)
+                    {
+                        enemy.OnRecover();
+                        enemy = null;
+                        healCurrentTime = 0;
 
-        }
-        else
-        {
-            healBeamOnce = false;
-            healingBeamLineRenderer.enabled = false;
-            healingBeamLineRenderer.positionCount = 0;
+                        healBeamOnce = false;
+                        healingBeamLineRenderer.gameObject.SetActive(false);
+                        healingBeamLineRenderer.positionCount = 0;
+                        return;
+                    }
+
+                }
+                if (Input.GetMouseButtonUp(1))
+                {
+                    Destroy(enemy.gameObject, .2f);
+                    enemy = null;
+                    healCurrentTime = 0;
+                    healBeamOnce = false;
+                    healingBeamLineRenderer.gameObject.SetActive(false);
+                    healingBeamLineRenderer.positionCount = 0;
+                }
+            }
+
         }
     }
 

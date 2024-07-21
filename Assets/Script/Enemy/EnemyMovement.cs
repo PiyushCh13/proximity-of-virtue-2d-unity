@@ -39,7 +39,7 @@ public class EnemyMovement : MonoBehaviour
     public bool isStuned;
     [SerializeField]
     GameObject recoveryParticle;
-    float enlightenDuration = 3;
+    float enlightenDuration = 5;
 
     private void Start()
     {
@@ -67,7 +67,7 @@ public class EnemyMovement : MonoBehaviour
     public void Patrol()
     {
 
-        transform.position = Vector2.MoveTowards(transform.position, wayPoint.position, Time.deltaTime * 2);
+        transform.position = Vector2.MoveTowards(transform.position, wayPoint.position, Time.deltaTime * 3);
         if (Vector2.Distance(transform.position, playerTransform.position) < attackRadius)
         {
             isPetrol = false;
