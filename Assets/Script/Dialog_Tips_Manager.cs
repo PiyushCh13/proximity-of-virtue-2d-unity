@@ -3,12 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Dialog_Tips_Manager : MonoBehaviour
 {
 
     [SerializeField]
     TextMeshProUGUI m_TextMesh;
+
+    public RawImage fadeImage;
+
+    public Sprite[] spriteBackgroundImages;
+    public RawImage dialogueImages;
 
     [SerializeField]
     string dialogText;
@@ -28,10 +34,12 @@ public class Dialog_Tips_Manager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (index < dialogues.Count)
+            if (index < dialogues.Count && index < spriteBackgroundImages.Length)
             {
                 UpdateIntroDialog(index);
-                index++;
+                dialogueImages.texture = spriteBackgroundImages[index].texture;
+                index++;              
+                SFXManager.Instance.PlaySound(SFXManager.Instance.clickSound);
             }
             else
             {
@@ -43,7 +51,7 @@ public class Dialog_Tips_Manager : MonoBehaviour
 
     private void OnDialogueFinish()
     {
-
+        SceneManagement.Instance.LoadScene(fadeImage, SceneList.Level1.ToString());
     }
 
     private void UpdateIntroDialog(int index)
