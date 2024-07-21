@@ -167,6 +167,7 @@ public class PlayerMovement : MonoBehaviour
                         healBeamOnce = false;
                         healingBeamLineRenderer.gameObject.SetActive(false);
                         healingBeamLineRenderer.positionCount = 0;
+                        
                         return;
                     }
 
