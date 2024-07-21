@@ -5,8 +5,8 @@ using UnityEngine;
 public class CameraMovement : MonoBehaviour
 {
     public Transform player;
-    public float lerpVal = 2;
-    public Animator animator;
+    public float xOffset;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -16,7 +16,6 @@ public class CameraMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Vector3.Lerp(transform.position,new Vector3(player.position.x,player.position.y,-10), lerpVal * Time.deltaTime);
-       
+        transform.position = new Vector3(player.transform.position.x - xOffset, transform.position.y, transform.position.z);
     }
 }

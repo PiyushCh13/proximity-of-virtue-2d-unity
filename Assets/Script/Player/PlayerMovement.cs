@@ -18,7 +18,6 @@ public class PlayerMovement : MonoBehaviour
     public GameObject glowBall;
     public float ballSpeed;
     public bool isAttacking;
-    public Animator cameraAnimator;
 
     void Start()
     {
@@ -28,26 +27,16 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(slideFwd)
-        {
-            if (rb.velocity.x <= 0)
-                cameraAnimator.Play("ZoomOut");
-        }
-        else
-        {
-            if (rb.velocity.x >= 0)
-                cameraAnimator.Play("ZoomOut");
-        }
-       
+
 
         BasicMove();
         Slide();
-        
+
         if (Input.GetMouseButtonDown(0))
         {
             if (isSliding)
                 return;
-         
+
             rb.velocity = Vector3.zero;
             isAttacking = true;
             playerAnimator.Play("Attack");
@@ -66,11 +55,9 @@ public class PlayerMovement : MonoBehaviour
             rb.AddForce(Vector2.up * jumpForce);
             grounCheck = false;
             playerAnimator.Play("Jump");
-
-
         }
 
-        if (rb.velocity.y < 0)
+        if (rb.velocity.y < 0 && !grounCheck)
         {
             playerAnimator.Play("JumpDrop");
         }
@@ -95,7 +82,6 @@ public class PlayerMovement : MonoBehaviour
                 playerTransform.eulerAngles = new Vector3(0, 0, 0);
             }
             slideFwd = true;
-            cameraAnimator.Play("ZoomIn");
         }
         if (Input.GetKeyUp(KeyCode.D))
         {
@@ -124,14 +110,13 @@ public class PlayerMovement : MonoBehaviour
                 playerTransform.eulerAngles = new Vector3(0, 180, 0);
             }
             slideFwd = false;
-            cameraAnimator.Play("ZoomIn");
         }
         if (Input.GetKeyUp(KeyCode.A))
         {
             if (grounCheck)
                 playerAnimator.Play("Idle");
             rb.velocity = Vector2.zero;
-           // cameraAnimator.Play("ZoomOut");
+            // cameraAnimator.Play("ZoomOut");
 
         }
     }
