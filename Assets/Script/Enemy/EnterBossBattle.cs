@@ -18,6 +18,7 @@ public class EnterBossBattle : MonoBehaviour
         {
             mainCamera.enabled = false;
             battleCamera.enabled = true;
+            MusicManager.Instance.PlayMusic(MusicManager.Instance.bossBattle);
         }
     }
 }

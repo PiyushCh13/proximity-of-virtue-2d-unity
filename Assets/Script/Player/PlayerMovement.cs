@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
@@ -32,6 +33,7 @@ public class PlayerMovement : MonoBehaviour
     public Image healtFiller;
     public float healCurrentTime = 0.0f;
     public float healTimeDuration = 2.5f;
+    public RawImage image;
 
     [Header("Player_Shooting")]
     public Transform shootArea;
@@ -77,6 +79,8 @@ public class PlayerMovement : MonoBehaviour
         healingBeamLineRenderer.SetPosition(0, shootArea.position);
         slideFwd = true;
         grounCheck = true;
+
+        MusicManager.Instance.PlayMusic(MusicManager.Instance.mainLevel);
     }
 
     private void FixedUpdate()
@@ -117,7 +121,6 @@ public class PlayerMovement : MonoBehaviour
     {
         //if (Input.GetKeyDown(KeyCode.E))
         {
-            print("SpellAttack");
             {
                 Instantiate(spellParticle, enemy.gameObject.transform.position + new Vector3(0.0f, 0.0f, spellParticle_Zoffset), transform.rotation);
             }
@@ -340,20 +343,22 @@ public class PlayerMovement : MonoBehaviour
     public void Attack()
     {
 
-        print("AttackDirection " + attackDirection.magnitude.ToString());
         //Condition if attackdirection is zero
         if (attackDirection.magnitude < 1)
         {
             attackDirection = Vector3.right;
         }
 
-        GameObject ballShoot = Instantiate(glowBall, shootArea.position, glowBall.transform.rotation);
-        ballShoot.GetComponent<BallShoot>().direction = attackDirection;
-        ballShoot.GetComponent<BallShoot>().byPlayer = true;
-        if (slideFwd)
-            ballShoot.GetComponent<BallShoot>().ballSpeed = ballSpeed;
-        else
-            ballShoot.GetComponent<BallShoot>().ballSpeed = -ballSpeed;
+        
+            GameObject ballShoot = Instantiate(glowBall, shootArea.position, glowBall.transform.rotation);
+            ballShoot.GetComponent<BallShoot>().direction = attackDirection;
+            ballShoot.GetComponent<BallShoot>().byPlayer = true;
+            if (slideFwd)
+                ballShoot.GetComponent<BallShoot>().ballSpeed = ballSpeed;
+            else
+                ballShoot.GetComponent<BallShoot>().ballSpeed = -ballSpeed;
+        
+        
 
     }
 
@@ -371,7 +376,7 @@ public class PlayerMovement : MonoBehaviour
             StartCoroutine(ReduceHealth());
         }
         else
-            Destroy(gameObject, .2f);
+            SceneManagement.Instance.LoadScene(image, SceneList.EndingScene.ToString());
     }
     IEnumerator ReduceHealth()
     {
@@ -406,8 +411,6 @@ public class PlayerMovement : MonoBehaviour
             if (!healBeamOnce)
             {
                 rayCast = Physics2D.Raycast(shootArea.position, enemy.gameObject.transform.position - shootArea.transform.position, healingBeamLayerMask);
-                print("Raycast Object " + rayCast.collider.gameObject.name);
-                print("Calling Raycast_Heal");
                 healBeamOnce = true;
             }
 

@@ -38,8 +38,7 @@ public class EnemyMovement : MonoBehaviour
 
     [Header("Stun_&_Recover Settings")]
     public bool isStuned;
-    [SerializeField]
-    GameObject recoveryParticle;
+    public GameObject recoveryParticle;
     float enlightenDuration = 5;
 
     private void Start()
@@ -99,8 +98,8 @@ public class EnemyMovement : MonoBehaviour
             yield return null;
         }
         stanfillGo.gameObject.SetActive(false);
-        
-        Destroy(gameObject,.2f);
+        recoveryParticle.SetActive(true);
+        Destroy(gameObject,.4f);
     }
 
     public void Attack()
@@ -144,7 +143,6 @@ public class EnemyMovement : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        print("Entered Player");
     }
 
     public void Defeat()

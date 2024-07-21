@@ -8,13 +8,9 @@ public class SFXManager : Singleton<SFXManager>
     [SerializeField] public AudioClip player_hurt;
     [SerializeField] public AudioClip player_Jump;
     [SerializeField] public AudioClip player_Death;
-    [SerializeField] public AudioClip player_groundCollision;
+    [SerializeField] public AudioClip player_walk;
     [SerializeField] public AudioClip player_Attack_Hit;
-    [SerializeField] public AudioClip healthPickup;
-    [SerializeField] public AudioClip gemPickup;
-    [SerializeField] public AudioClip mapMoveSound;
     [SerializeField] public AudioClip clickSound;
-    [SerializeField] public AudioClip levelSelected;
     [SerializeField] public AudioClip enemyExplode;
     [SerializeField] public AudioClip bossImpact;
     [SerializeField] public AudioClip bossHit;
