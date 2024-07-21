@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 
 [Serializable]
 public enum EnemyType
@@ -98,8 +99,8 @@ public class EnemyMovement : MonoBehaviour
             yield return null;
         }
         stanfillGo.gameObject.SetActive(false);
-        Destroy(gameObject,.2f); 
-
+        
+        Destroy(gameObject,.2f);
     }
 
     public void Attack()
