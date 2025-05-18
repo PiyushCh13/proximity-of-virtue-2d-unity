@@ -21,7 +21,7 @@ public class SpinningStarts : MonoBehaviour
       
         if (collision.gameObject.name.Contains("Player"))
         {
-            collision.gameObject.GetComponent<PlayerMovement>().HeathManger(giveDam);
+            collision.gameObject.GetComponent<PlayerMovement>().HealthManager(giveDam);
             Destroy(gameObject);
         }
        

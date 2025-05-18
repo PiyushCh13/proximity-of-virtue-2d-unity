@@ -49,7 +49,7 @@ public class BallShoot : MonoBehaviour
         }
         if (collision.gameObject.name.Contains("Player") && byEnemy)
         {
-            collision.gameObject.GetComponent<PlayerMovement>().HeathManger(cc);
+            collision.gameObject.GetComponent<PlayerMovement>().HealthManager(cc);
             Destroy(gameObject);
         }
         if (collision.gameObject.name.Contains("Boss") && byPlayer)
